@@ -1,0 +1,64 @@
+
+
+;splits the list into even and odd
+split1 macro 
+        mov al,[si]
+        div 2 ;check if the number is even
+        cmp ah, 0
+        jne impair 
+        mov [di], dividende
+        inc di
+        jmp end
+
+impair : 
+        mov [bx], dividende
+        inc bx
+        jmp end
+end:
+endm
+
+
+
+split2 macro 
+        mov al,[si]
+        div 2 ;check if the number is %3
+        cmp ah, 0
+        jne autre 
+        mov [di], dividende ;adds to array3
+        inc di
+        jmp end
+
+autre :
+        mov [bx], dividende ;adds to autre 
+        inc bx
+        jmp end
+end:
+endm
+
+;array:list of sorted input
+;array1:List of even numbers
+;array2:list of odd numbers
+;array3:List of number %3
+;autre :list of other numbers
+
+lea si,array ;address list sorted 
+lea di,array1 ; address list even
+lea bx ,array2 ; address list odd
+
+
+mov cx,20
+a:
+split1
+inc si
+LOOP a
+
+
+lea si,array2 ;address list odd
+lea di,array3 ; address list %3
+lea bx ,autre ; address list autre
+
+mov cx,20
+b:
+split2
+inc si
+LOOP b
