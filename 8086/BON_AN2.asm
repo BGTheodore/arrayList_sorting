@@ -17,15 +17,15 @@ ELEMAN  DB 100
 MSG2	DB	'Entrez la dimension de la liste: ','$'
 MSG_neg	DB	'-','$'
 MSG_val	DB	'. Element: ','$'
-MSG_err DB	' -Erreur! Veuillez entrer un nombre entre 1 et 255', '$'
-MSG_err1 DB	' -Erreur! Veuillez entrer un nombre entre 1 et 20', '$'
+MSG_err DB	' -Erreur! Veuillez entrer un nombre entre 0 et 255', '$'
+MSG_err1 DB	' -Erreur! Veuillez entrer un nombre entre 0 et 20', '$'
 MSG4 	DB	'-- Liste originale: --', '$'
 MSG5 	DB	'-- Liste trie: --', '$'
 MSG6 	DB	'-- Liste nombres pairs (ordre croissant): --', '$'  
 MSG7 	DB	'-- Liste nombres impairs multiples de 3 (ordre decroissant): --', '$'  
 MSG8	DB	'-- Liste nombres des autres nombres (ordre croissant): --', '$'
 MSG9	DB	'           -- Trie d une liste saisie par l utilisateur. --', '$'
-MSG10	DB	'           -- Merci d avoir utiliser notre programme! --', '$'
+MSG10	DB	'           -- Merci d avoir utilise notre programme! --', '$'
 
 
 MSG_voi	DB	'  ','$'
@@ -95,7 +95,7 @@ getElement:
 
 		CALL read_number ; recoit l'input
 		
-		CMP BX,256
+		CMP BX,255
 		JGE	hata1    ; Borne superieur 255
 		CMP BX,1
 		JL hata1	; Borne inferieur 1
@@ -160,7 +160,7 @@ showArray:
         MOV size,cx
 		XOR SI, SI
         
-                            ;Affichage des Nombres pairs
+                            ;Affichage des Nombres tries
 showArray2:
 		XOR BH,BH
 		MOV BL, dizi[SI]
@@ -183,6 +183,8 @@ showArray2:
         CALL new_line
         mov cx,size
         XOR SI,SI
+		
+		; affichage de la liste triee
 showArray3:
 		XOR BH,BH
         XOR AH,AH
@@ -206,7 +208,7 @@ showArray3:
 
         CALL new_line
         CALL new_line
-		LEA DX,MSG7	; list odd numbers.
+		LEA DX,MSG7	
 		MOV AH,9
 		
 		INT 21H
