@@ -1,4 +1,11 @@
-      
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Programme : Trie d'une liste saisie par l'utilisateur ;;
+;;Groupe    :1                                          ;;
+;;Membres   :Jean-Bernard ALTIDOR                       ;;
+;;           Kevin DUBUCHE                              ;;
+;;           Barbara THEODORE                           ;;
+;;                  Assembleur 8086 (Octobre 2020)      ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         
 STACKSG SEGMENT PARA STACK 'STACK'
         DW 64 DUP(?)
@@ -9,7 +16,7 @@ DIZI    DB 100 dup(0)
 ELEMAN  DB 100
 MSG2	DB	'Entrez la dimension de la liste: ','$'
 MSG_neg	DB	'-','$'
-MSG_val	DB	'. element: ','$'
+MSG_val	DB	'. Element: ','$'
 MSG_err DB	' -Erreur! Veuillez entrer un nombre entre 1 et 255', '$'
 MSG_err1 DB	' -Erreur! Veuillez entrer un nombre entre 1 et 20', '$'
 MSG4 	DB	'-- Liste originale: --', '$'
@@ -17,12 +24,15 @@ MSG5 	DB	'-- Liste trie: --', '$'
 MSG6 	DB	'-- Liste nombres pairs (ordre croissant): --', '$'  
 MSG7 	DB	'-- Liste nombres impairs multiples de 3 (ordre decroissant): --', '$'  
 MSG8	DB	'-- Liste nombres des autres nombres (ordre croissant): --', '$'
+MSG9	DB	'           -- Trie d une liste saisie par l utilisateur. --', '$'
+MSG10	DB	'           -- Merci d avoir utiliser notre programme! --', '$'
+
 
 MSG_voi	DB	'  ','$'
 the_string db 26         
            db ?          
            db 26 dup (?) 
-size DW 0       ;dimension de la liste
+size DW 0;      Dimension du tableau
 DATASG ENDS
 
 CODESG  SEGMENT PARA 'CODE'
@@ -35,29 +45,36 @@ BASLA   PROC FAR
         MOV AX, DATASG
         MOV DS, AX
 		;----------;
-		
+
+		LEA DX,MSG9 
+		MOV AH,9
+		INT 21H
+        CALL new_line
+
+        ;Demande de la dimension du tableau
 		ask_again:
-        LEA DX,MSG2	 ; Demande la dimension de la liste a analyser
+        LEA DX,MSG2	 
 		MOV AH,9
 		INT 21H
 		
-		CALL read_number ; Place l'input dans BX 
+		CALL read_number ; Recoit la dimension de la liste  
 		CMP BX,21
-		JGE	hata0    ; borne superieur 20
+		JGE	hata0    ;  Borne superieur 20
 		CMP BX,1
-		JL hata0	; borne inferieur 0
+		JL hata0	; Borne inferieur 1 
+		
 		
         JMP ok:
 
 		hata0:
-        LEA DX,MSG_err1 ; Message d'erreur
+        LEA DX,MSG_err1 ;Message d'erreur
 		MOV AH,9
 		INT 21H		
 		CALL new_line
 		JMP ask_again
 
         ok:
-		CALL new_line
+		CALL new_line ;saut de ligne
         PUSH BX 
 		
 		XOR CX,CX
@@ -65,25 +82,27 @@ BASLA   PROC FAR
 		
 		XOR SI,SI 
 
-getElement:             ;Recoit les entrees de l'utilisateur
+        ;Reception et analyse de des entrees de l'utilisateur
+getElement:
 		MOV BX,SI
 		INC BL
-		CALL print	
+		CALL print	;
 
-		LEA DX,MSG_val	;demande le ieme element
+		LEA DX,MSG_val	
 		MOV AH,9
 		
 		INT 21H
 
-		CALL read_number 
+		CALL read_number ; recoit l'input
 		
 		CMP BX,256
-		JGE	hata1    ;Borne superieur 255
+		JGE	hata1    ; Borne superieur 255
 		CMP BX,1
 		JL hata1	; Borne inferieur 1
+        
 		JMP hatayok
 		hata1:
-			LEA DX,MSG_err ; Message d'erreur
+			LEA DX,MSG_err 
 			MOV AH,9
 			INT 21H
 			DEC SI 
@@ -97,17 +116,18 @@ getElement:             ;Recoit les entrees de l'utilisateur
 		INC SI
 		LOOP getElement
 		
-		CALL new_line	; Saut de ligne
-		LEA DX,MSG4	;
+		CALL new_line	
+		LEA DX,MSG4	
 		MOV AH,9
 		INT 21H
 		CALL new_line	
 		
 		POP CX
-		PUSH CX ; Sauvegarde de CX
+		PUSH CX ;
 		XOR SI,SI
 
-showArray: ;affichage de la liste initiale
+                        ;Affichage de la liste initiale
+showArray:
 		XOR BH,BH
 		MOV BL, dizi[SI]
 		CALL print	
@@ -118,17 +138,18 @@ showArray: ;affichage de la liste initiale
 		
 		INC SI
 		LOOP showArray
-		;;;;;;;;;;;;;;;;;;;  algorithme QuickSort ;;;;;;;;;;;;;;;;;;;;;;
+		
 		CALL new_line
 		CALL new_line
-		LEA DX,MSG5	
+		LEA DX,MSG5	; 
 		MOV AH,9
 		INT 21H
 		
 		
+        
 		XOR AX,AX ; left = 0
 		POP BX ; right = BX = n
-		PUSH BX ;
+		PUSH BX 
 		DEC BX ; right = n-1
 		CALL  quicksort
 		
@@ -137,32 +158,32 @@ showArray: ;affichage de la liste initiale
 		
 		POP CX  ; cx = n
         MOV size,cx
-		XOR SI,SI
-
-showArray2:     ;affichage de la liste trie
+		XOR SI, SI
+        
+                            ;Affichage des Nombres pairs
+showArray2:
 		XOR BH,BH
 		MOV BL, dizi[SI]
 		CALL print	
 		
-		LEA DX,MSG_voi
+		LEA DX,MSG_voi	
 		MOV AH,9
 		INT 21H
 		
 		INC SI
 		LOOP showArray2   
 		
-                                     ;liste nombres pairs 
+                                     
         CALL new_line
         CALL new_line
-		LEA DX,MSG6	; list even numbers.
+		LEA DX,MSG6	
 		MOV AH,9
 		
 		INT 21H
         CALL new_line
         mov cx,size
         XOR SI,SI
-
-showArray3:         ;affichage de la liste des nombres pairs
+showArray3:
 		XOR BH,BH
         XOR AH,AH
 		
@@ -174,14 +195,14 @@ showArray3:         ;affichage de la liste des nombres pairs
         JNE DONE
         EVEN:
         MOV BL, dizi[SI]
-		CALL print		
+		CALL print			
 		LEA DX,MSG_voi	
 		MOV AH,9
 		INT 21H
 		DONE:
 		INC SI
 		LOOP showArray3
-                               ;   Liste nombres impairs multiples de 3  
+                              
 
         CALL new_line
         CALL new_line
@@ -195,7 +216,8 @@ showArray3:         ;affichage de la liste des nombres pairs
         add SI,size
         dec SI
 
-showArray4:                 ;Affichage de la liste des nombres impairs %3
+                        ;Affichage des nombres impairs et %3 
+showArray4:
 		XOR BH,BH
         XOR AH,AH
 		
@@ -216,8 +238,8 @@ showArray4:                 ;Affichage de la liste des nombres impairs %3
         JE de
 
         MOV BL, dizi[SI]
-		CALL print		
-		LEA DX,MSG_voi
+		CALL print			
+		LEA DX,MSG_voi	
 		MOV AH,9
 		INT 21H
         de: 
@@ -234,9 +256,8 @@ showArray4:                 ;Affichage de la liste des nombres impairs %3
         CALL new_line
         mov cx,size
         XOR SI,SI
-
-
-showArray5:                 ;  Affichage des autres nombres
+                                ;Affichage des autres nombres 
+showArray5:
 		XOR BH,BH
         XOR AH,AH
 		
@@ -258,7 +279,7 @@ showArray5:                 ;  Affichage des autres nombres
         JE deR
 
         MOV BL, dizi[SI]
-		CALL print		
+		CALL print			
 		LEA DX,MSG_voi	
 		MOV AH,9
 		INT 21H
@@ -266,14 +287,19 @@ showArray5:                 ;  Affichage des autres nombres
          inc SI
         loop showArray5
 
-    
+        CALL new_line
+        LEA DX,MSG10 
+		MOV AH,9
+		INT 21H
+        
 
+        HLT
 
-
-        RETF
 BASLA   ENDP
 
-quicksort	PROC    ;procedure de QuickSort
+                                        ;Procedure de QuickSort
+quicksort	PROC
+
 	; LEFT:AX, RIGHT:BX
 PUSH BX
 PUSH AX
@@ -286,7 +312,7 @@ POP AX
 	DEC BX ; right = pivot - 1
 	CALL quicksort ; (left:left, right:pivot-1)
 POP BX
-	MOV AX,DX ; pivotu aktar
+	MOV AX,DX 
 	INC AX ; left = pivot + 1
 	CALL quicksort ; (left:pivot+1, right:right)
 	JMP devamEdiyor
@@ -329,7 +355,7 @@ dongu1:
 	INC DI
 	LOOP dongu1
 
-	 
+	
 	PUSH DX
 	XOR DH,DH
 	INC SI ; SI+1
@@ -338,17 +364,18 @@ dongu1:
 	MOV dizi[SI],DL
 	POP DX
 	
-	MOV DX,SI 
+	MOV DX,SI ;; DX = SI+1 
 
 	RET
 arrange_pivot ENDP
 
-
-read_number	PROC  ;Procedure pour recevoir les entrees de l'utilisateur
+                                    ;Procedure pour recevoir les entrees de l'uitilisateur
+read_number	PROC
 PUSH SI
 	
 	MOV AH, 0ah  
 	mov dx,offset the_string  
+	INT 21H
 	
 	MOV SI, offset the_string 
 	CALL string2num	
@@ -356,12 +383,12 @@ POP SI
 	RET
 read_number ENDP
 
-
-new_line	PROC   ;Saut de ligne
+                                    ;Procedure pour faire un saut de ligne
+new_line	PROC
 		PUSH DX
 		PUSH AX
 		
-		MOV dl, 10	; \n
+		MOV dl, 10	;  \n
 		MOV ah, 02h
 		INT 21h
 		MOV dl, 13
@@ -372,20 +399,20 @@ new_line	PROC   ;Saut de ligne
 		POP DX
 		RET
 new_line ENDP
-
-print		PROC        ;Procedure d'affichage
+                                ;Procedure d'affichage
+print		PROC
 push ax
 push dx
 push cx
 push bx
-	mov  ax, bx ; 
+	mov  ax, bx 
 	CMP bl,0
-	JGE devam ;
-		LEA DX,MSG_neg 
+	JGE devam ; 
+		LEA DX,MSG_neg ;
 		MOV AH,9
 		INT 21H
 		MOV AX,BX 
-		NEG Al 	
+		NEG Al 
 	devam:
 	
    MOV BX, 10     
@@ -424,11 +451,11 @@ push si
   add  si, cx 
 
   xor bx,bx
-  mov  bp, 1 ; MULTIPLE OF 10 TO MULTIPLY EVERY DIGIT.
+  mov  bp, 1 ;MULTIPLE OF 10 TO MULTIPLY EVERY DIGIT.
 
   xor ax,ax
 repeat:
-                    
+                   
   mov  al, [ si ] 
   CMP AL,'-'
   JNE positive
@@ -444,9 +471,9 @@ repeat:
 
   mov  ax, bp
   mov  bp, 10
-  mul  bp ;AX*10 = DX:AX
+  mul  bp 
   mov  bp, ax 
-t
+
   dec  si 
   loop repeat
 negative:
