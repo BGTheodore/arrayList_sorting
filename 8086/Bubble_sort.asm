@@ -18,10 +18,10 @@ mov bx,offset array
 mov ah,1
 
 inputs:
-int 21h
-mov [bx],al
-inc bx
-;call    scan_num
+;int 21h
+;mov [bx],al
+;inc bx
+call    scan_num
 Loop inputs
 
 mov cx,20
@@ -220,75 +220,6 @@ printed:
         RET
 PRINT_NUM       ENDP
 
-
-
-; this procedure prints out an unsigned
-; number in AX (not just a single digit)
-; allowed values are from 0 to 65535 (FFFF)
-PRINT_NUM_UNS   PROC    NEAR
-        PUSH    AX
-        PUSH    BX
-        PUSH    CX
-        PUSH    DX
-
-        ; flag to prevent printing zeros before number:
-        MOV     CX, 1
-
-        ; (result of "/ 10000" is always less or equal to 9).
-        MOV     BX, 10000       ; 2710h - divider.
-
-        ; AX is zero?
-        CMP     AX, 0
-        JZ      print_zero
-
-begin_print:
-
-        ; check divider (if zero go to end_print):
-        CMP     BX,0
-        JZ      end_print
-
-        ; avoid printing zeros before number:
-        CMP     CX, 0
-        JE      calc
-        ; if AX<BX then result of DIV will be zero:
-        CMP     AX, BX
-        JB      skip
-calc:
-        MOV     CX, 0   ; set flag.
-
-        MOV     DX, 0
-        DIV     BX      ; AX = DX:AX / BX   (DX=remainder).
-
-        ; print last digit
-        ; AH is always ZERO, so it's ignored
-        ADD     AL, 30h    ; convert to ASCII code.
-        PUTC    AL
-
-
-        MOV     AX, DX  ; get remainder from last div.
-
-skip:
-        ; calculate BX=BX/10
-        PUSH    AX
-        MOV     DX, 0
-        MOV     AX, BX
-        DIV     CS:ten  ; AX = DX:AX / 10   (DX=remainder).
-        MOV     BX, AX
-        POP     AX
-
-        JMP     begin_print
-        
-print_zero:
-        PUTC    '0'
-        
-end_print:
-
-        POP     DX
-        POP     CX
-        POP     BX
-        POP     AX
-        RET
-PRINT_NUM_UNS   ENDP
 
 
 
